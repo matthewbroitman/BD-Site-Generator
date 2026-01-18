@@ -5,6 +5,7 @@ from inline_markdown import (
     split_nodes_link,
     extract_markdown_links,
     extract_markdown_images,
+    text_to_textnodes
 )
 
 from textnode import TextNode, TextType
@@ -201,6 +202,109 @@ class TestInlineMarkdown(unittest.TestCase):
             ],
             new_nodes,
         )
+    
+
+    def test_text_to_textnodes_just_text(self):
+        text = "This is a plain set of text."
+        test_nodes = text_to_textnodes(text)
+        ex_nodes = [TextNode(text,TextType.TEXT)
+        ]
+        self.assertListEqual(test_nodes,ex_nodes)
+
+    def test_text_to_textnodes_delims_seq(self):
+        text = "This is a set of text with **bold**, _italic_, and `code` in it."
+        test_nodes = text_to_textnodes(text)
+        ex_nodes = [TextNode("This is a set of text with ",TextType.TEXT),
+                    TextNode("bold",TextType.BOLD),
+                    TextNode(", ",TextType.TEXT),
+                    TextNode("italic",TextType.ITALIC),
+                    TextNode(", and ",TextType.TEXT),
+                    TextNode("code",TextType.CODE),
+                    TextNode(" in it.",TextType.TEXT)
+        ]
+        self.assertListEqual(test_nodes,ex_nodes)
+
+    def test_text_to_textnodes_image_and_link(self):
+        text = "This is a set of text with an ![image](https://i.imgur.com/zjjcJKZ.png) and a [link](https://boot.dev) in it."
+        test_nodes = text_to_textnodes(text)
+        ex_nodes = [TextNode("This is a set of text with an ",TextType.TEXT),
+                    TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"),
+                    TextNode(" and a ",TextType.TEXT),
+                    TextNode("link", TextType.LINK, "https://boot.dev"),
+                    TextNode(" in it.",TextType.TEXT)
+        ]
+        self.assertListEqual(test_nodes,ex_nodes)
+
+    def test_text_to_textnodes_delims_image_and_link(self):
+        text = "This is a set of text with **bold**, _italic_, and `code` in it, as well as an ![image](https://i.imgur.com/zjjcJKZ.png) and a [link](https://boot.dev) in it."
+        test_nodes = text_to_textnodes(text)
+        ex_nodes = [TextNode("This is a set of text with ",TextType.TEXT),
+                    TextNode("bold",TextType.BOLD),
+                    TextNode(", ",TextType.TEXT),
+                    TextNode("italic",TextType.ITALIC),
+                    TextNode(", and ",TextType.TEXT),
+                    TextNode("code",TextType.CODE),
+                    TextNode(" in it, as well as an ",TextType.TEXT),
+                    TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"),
+                    TextNode(" and a ",TextType.TEXT),
+                    TextNode("link", TextType.LINK, "https://boot.dev"),
+                    TextNode(" in it.",TextType.TEXT)
+        ]
+        self.assertListEqual(test_nodes,ex_nodes)
+
+    def test_text_to_textnodes_mul_delims(self):
+        text = "This is a set of text with **bold**, **more bold**, _italic_, _more italic_, `code`, and `more code` in it."
+        test_nodes = text_to_textnodes(text)
+        ex_nodes = [TextNode("This is a set of text with ",TextType.TEXT),
+                    TextNode("bold",TextType.BOLD),
+                    TextNode(", ",TextType.TEXT),
+                    TextNode("more bold",TextType.BOLD),
+                    TextNode(", ",TextType.TEXT),
+                    TextNode("italic",TextType.ITALIC),
+                    TextNode(", ",TextType.TEXT),
+                    TextNode("more italic",TextType.ITALIC),
+                    TextNode(", ",TextType.TEXT),
+                    TextNode("code",TextType.CODE),
+                    TextNode(", and ",TextType.TEXT),
+                    TextNode("more code",TextType.CODE),
+                    TextNode(" in it.",TextType.TEXT)
+        ]
+        self.assertListEqual(test_nodes,ex_nodes)
+
+    def test_text_to_textnodes_edge_delims(self):
+        text = "**This** is a set of text that is _important._"
+        test_nodes = text_to_textnodes(text)
+        ex_nodes = [TextNode("This",TextType.BOLD),
+                    TextNode(" is a set of text that is ",TextType.TEXT),
+                    TextNode("important.",TextType.ITALIC),
+        ]
+        self.assertListEqual(test_nodes,ex_nodes)
+
+    def test_text_to_textnodes_images_links_no_spaces(self):
+        text = "Hot Tests![image](https://i.imgur.com/zjjcJKZ.png)click now[link](https://boot.dev)you want to"
+        test_nodes = text_to_textnodes(text)
+        ex_nodes = [TextNode("Hot Tests",TextType.TEXT),
+                    TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"),
+                    TextNode("click now",TextType.TEXT),
+                    TextNode("link", TextType.LINK, "https://boot.dev"),
+                    TextNode("you want to",TextType.TEXT)
+        ]
+        self.assertListEqual(test_nodes,ex_nodes)
+
+    def test_text_to_textnodes_images_links_broken(self):
+        text = "Hot Tests![deadimage] (broken link)click now[deadlink] (dead)you want to"
+        test_nodes = text_to_textnodes(text)
+        ex_nodes = [TextNode("Hot Tests![deadimage] (broken link)click now[deadlink] (dead)you want to",TextType.TEXT),
+        ]
+        self.assertListEqual(test_nodes,ex_nodes)
+
+    def test_text_to_textnodes_delims_code_protect(self):
+        text = "This is a set of text with `code that has **stars** and _underscores_.`"
+        test_nodes = text_to_textnodes(text)
+        ex_nodes = [TextNode("This is a set of text with ",TextType.TEXT),
+                    TextNode("code that has **stars** and _underscores_.",TextType.CODE),
+        ]
+        self.assertListEqual(test_nodes,ex_nodes)
 
 if __name__ == "__main__":
     unittest.main()
