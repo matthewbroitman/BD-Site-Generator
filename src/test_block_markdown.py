@@ -1,7 +1,9 @@
 import unittest
 
-from block_markdown import (
-markdown_to_blocks
+from block_markdown import(
+BlockType,
+markdown_to_blocks,
+block_to_blocktype
 )
 
 class TestBlockMarkdown(unittest.TestCase):
@@ -94,6 +96,58 @@ And one last one with _italics_
                 "-and yet one more with only one `code` thing",
             ],
         )
+
+class TestBlockToBlocktype(unittest.TestCase):
+    def test_paragraph_block(self):
+        block = """This is a paragraph of text."""
+        result = block_to_blocktype(block)
+        self.assertEqual(result,BlockType.PARAGRAPH)
+
+    def test_header_block(self):
+        block = """###This is a piece of header text."""
+        result = block_to_blocktype(block)
+        self.assertEqual(result,BlockType.HEADING)
+
+    def test_code_block(self):
+        block = """```\nThis is a piece of code,\nspanning two lines.```"""
+        result = block_to_blocktype(block)
+        self.assertEqual(result,BlockType.CODE)
+
+    def test_quote_block(self):
+        block = """> This is a quote\n> of multiples lines"""
+        result = block_to_blocktype(block)
+        self.assertEqual(result,BlockType.QUOTE)
+
+    def test_unordered_list_block(self):
+        block = """- This is a list\n- of multiples items"""
+        result = block_to_blocktype(block)
+        self.assertEqual(result,BlockType.UNORDERED_LIST)
+
+    def test_ordered_list_block(self):
+        block = """1. This is a list\n2. of multiples items"""
+        result = block_to_blocktype(block)
+        self.assertEqual(result,BlockType.ORDERED_LIST)
+
+    def test_code_block_no_newline(self):
+        block = """```This is a piece of code,\nspanning two lines.```"""
+        result = block_to_blocktype(block)
+        self.assertEqual(result,BlockType.PARAGRAPH)
+        
+    def test_quote_block_bad_line(self):
+        block = """> This is a quote\nof multiples lines"""
+        result = block_to_blocktype(block)
+        self.assertEqual(result,BlockType.PARAGRAPH)
+
+    def test_unord_list_block_missing_space(self):
+        block = """-This is a list\n-without spaces"""
+        result = block_to_blocktype(block)
+        self.assertEqual(result,BlockType.PARAGRAPH)
+
+    def test_ord_list_block_misnumber(self):
+        block = """1. This is\n4. a poorly ordered\n3. list"""
+        result = block_to_blocktype(block)
+        self.assertEqual(result,BlockType.PARAGRAPH)
+
 
 if __name__ == "__main__":
     unittest.main()
