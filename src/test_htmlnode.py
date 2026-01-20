@@ -110,11 +110,6 @@ class TestLeafNode(unittest.TestCase):
             parent.to_html(),
             '<div class="container"><span>child</span></div>',
         )
-
-    def test_to_html_empty_child_raises(self):
-        parent_node = ParentNode("div", [])
-        with self.assertRaises(ValueError):
-            parent_node.to_html()
         
     def test_to_html_with_grandchildren_and_props(self):
         grandchild_node = LeafNode("b", "grandchild")

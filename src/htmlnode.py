@@ -46,10 +46,10 @@ class ParentNode(HTMLNode):
             raise ValueError("No Tag")
         if self.children == None:
                 raise ValueError("No Children")
-        if self.children == []:
-            raise ValueError("No Children - Empty List")
-        else:
-            concat_string=f"<{self.tag}{self.props_to_html()}>"
-            for child in self.children:
-                concat_string += child.to_html()
-            return concat_string + f"</{self.tag}>"
+        children_html = ""
+        for child in self.children:
+            children_html += child.to_html()
+        return f"<{self.tag}{self.props_to_html()}>{children_html}</{self.tag}>"
+
+    def __repr__(self):
+        return f"ParentNode({self.tag}, children: {self.children}, {self.props})"
