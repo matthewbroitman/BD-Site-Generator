@@ -24,18 +24,12 @@ class LeafNode(HTMLNode):
         super().__init__(tag,value,None,props)
 
     def to_html(self):
-        if self.value == None:
-            raise ValueError
-        if self.tag == None:
-            return f"{self.value}"
-        if self.tag == "a":
-            for key,value in self.props.items():
-                return f'<{self.tag} {key}="{value}"> {self.value}</{self.tag}>'
-        if self.tag == "img":
-            for key,value in self.props.items():
-                return f'<{self.tag} {key}="{value}" alt="{self.value}" />'
-        else:
-            return f"<{self.tag}>{self.value}</{self.tag}>"
+        if self.value is None:
+            print("Bad LeafNode:", self.tag, self.props, self.children)
+            raise ValueError("invalid HTML: no value")
+        if self.tag is None:
+            return self.value
+        return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
         
 class ParentNode(HTMLNode):
     def __init__(self,tag,children,props=None):

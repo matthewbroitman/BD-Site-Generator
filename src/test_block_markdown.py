@@ -229,7 +229,7 @@ this is paragraph text
         html = node.to_html()
         self.assertEqual(
             html,
-            "<div><blockquote>This is a blockquote block</blockquote><p>this is paragraph text</p></div>",
+            "<div><blockquote>This is a \nblockquote block</blockquote><p>this is paragraph text</p></div>",
         )
 
     def test_code(self):

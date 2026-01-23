@@ -27,7 +27,10 @@ def block_to_blocktype(block):
         return BlockType.HEADING
     if len(lines) > 1 and lines[0].startswith("```") and lines[-1].startswith("```"):
         return BlockType.CODE
-    if all(line.startswith("> ") for line in lines):
+    if all(
+        line.lstrip().startswith(">")
+        for line in lines if line.strip() != ""
+        ):
         return BlockType.QUOTE
     if all(line.startswith("- ") for line in lines):
         return BlockType.UNORDERED_LIST
@@ -133,6 +136,6 @@ def quote_to_html_node(block):
         if not line.startswith(">"):
             raise ValueError("invalid quote block")
         new_lines.append(line.lstrip(">").strip())
-    content = " ".join(new_lines)
+    content = "\n".join(new_lines)
     children = text_to_children(content)
     return ParentNode("blockquote", children)
