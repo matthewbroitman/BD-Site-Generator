@@ -20,3 +20,13 @@ def generate_page(from_path,template_path,dest_path):
     with open(dest_path, "w", encoding="utf-8") as f:
         f.write(template_string)
     
+def generate_page_recursively(dir_path_content,template_path,dest_dir_path):
+    items = os.listdir(dir_path_content)
+    for item in items:
+        item_path = os.path.join(dir_path_content,item)
+        dest_item_path = os.path.join(dest_dir_path,item.replace(".md",".html"))
+        if os.path.isfile(item_path) and item_path.endswith(".md"):
+            generate_page(item_path,template_path,dest_item_path)
+        if os.path.isdir(item_path):
+            generate_page_recursively(item_path,template_path,dest_item_path)
+    
